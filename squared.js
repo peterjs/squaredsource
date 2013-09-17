@@ -1,4 +1,18 @@
 window.onload = function(e) {
+
+    var colormap = function() {
+        //colorbrewer2.org
+        var colors = [[241,238,246], [189,201,225], [116,169,207], [42,140,190], [4,90,141]];
+        var hexColors = colors.map(function (c) {
+            return c.reduce(function (hexColor, val) {
+               var hexVal = val.toString(16);
+               if (val < 16) hexVal = '0' + hexVal;
+               return hexColor + hexVal;
+            }, '#');
+        });
+        return hexColors;
+    };
+
 //    peter-mbp:squaredsource peter$ /opt/local/bin/git --version
 //    git version 1.8.3.1
 //    peter-mbp:squaredsource peter$ /usr/bin/git --version
@@ -17,7 +31,6 @@ window.onload = function(e) {
 
     gw.log(".", function(err, logs) {
         console.log(logs);
-        var message = '';
         //use (var x in a) rather than (x in a) - don't want to create a global
         //All objects in JS are associative
         var dates = [];
@@ -82,9 +95,6 @@ window.onload = function(e) {
             lastDayInColumn = 6;
         }
 
-        dates = buckets;
-
-        message = dates;
-        c.textContent = message;
+        c.textContent = buckets;
     });
 };
