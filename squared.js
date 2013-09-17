@@ -60,7 +60,6 @@ window.onload = function(e) {
         var currentDay = days-1;
         for (var column = Math.ceil(days/7); column >= 0; column--) {
             for (var row = lastDayInColumn; row >= 0 && currentDay >= 0; row--) {
-                t++;
                 var x = column*13;
                 var y = row*13;
                 var  bucket = buckets[currentDay];
