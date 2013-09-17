@@ -55,26 +55,33 @@ window.onload = function(e) {
         var calendar = document.createElementNS(NS, 'g');
         calendar.setAttribute('transform','translate(20,20)');
         calendar1.appendChild(calendar);
-        var x = 0;
+        var lastDayInColumn = new Date().getUTCDay();
 
-        buckets.forEach(function(bucket) {
-//            createElementNS("http://www.w3.org/2000/svg", 'path')
-//            var transform = document.createElement('g');
-            var transform = document.createElementNS(NS, 'g');
-            transform.setAttribute('transform','translate('+x+',0)');
-            x = x+13;
-            var rect = document.createElementNS(NS,'rect');
+        var currentDay = days-1;
+        for (var column = Math.ceil(days/7); column >= 0; column--) {
+            for (var row = lastDayInColumn; row >= 0 && currentDay >= 0; row--) {
+                t++;
+                var x = column*13;
+                var y = row*13;
+                var  bucket = buckets[currentDay];
+                var transform = document.createElementNS(NS, 'g');
+                transform.setAttribute('transform','translate('+x+','+y+')');
 
-            rect.setAttribute('class','day');
-            rect.setAttribute('y','0');
-            rect.setAttribute('width','11');
-            rect.setAttribute('height','11');
-            var color = (!bucket)?'000000':'555555';
-            rect.setAttribute('style','fill: #'+color+';');
-            transform.appendChild(rect);
-            calendar.appendChild(transform);
-            console.log(bucket || '0');
-        });
+                var rect = document.createElementNS(NS,'rect');
+
+                rect.setAttribute('class','day');
+                rect.setAttribute('y','0');
+                rect.setAttribute('width','11');
+                rect.setAttribute('height','11');
+                var color = (!bucket)?'000000':'555555';
+                rect.setAttribute('style','fill: #'+color+';');
+                transform.appendChild(rect);
+                calendar.appendChild(transform);
+                console.log(bucket || '0');
+                currentDay = currentDay - 1;
+            }
+            lastDayInColumn = 6;
+        }
 
         dates = buckets;
 
