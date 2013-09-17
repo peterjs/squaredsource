@@ -27,22 +27,54 @@ window.onload = function(e) {
         //filter undefined
         dates = dates.filter(function(d){ return d;});
         //months are 0-11
+        var days = 365;
         dates = dates.map(function(date) {
             var today = new Date();
             today = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
                 return ((today - date)/(24*60*60*1000));
             }).map(function(diff) {
                 //commits made today are (-1.0,0.0]
-                return Math.floor(365 - diff - 1);
+                return Math.floor(days - diff - 1);
             });
 
         //bucket dates
+
+//        var zeros = new Array(days).
+        var zeros = Array.apply(null, new Array(days)).map(Number.prototype.valueOf,0);
         var buckets = dates.reduce(function(bucks, day) {
-            if (day < 365) {
+            if (day < days) {
                 bucks[day] = (bucks[day] || 0) + 1;
             }
             return bucks;
-        }, []);
+        }, zeros);
+
+        var calendar1 = document.getElementById('calendar');
+//        var calendar = document.createElement('g');
+
+        var NS="http://www.w3.org/2000/svg";
+        var calendar = document.createElementNS(NS, 'g');
+        calendar.setAttribute('transform','translate(20,20)');
+        calendar1.appendChild(calendar);
+        var x = 0;
+
+        buckets.forEach(function(bucket) {
+//            createElementNS("http://www.w3.org/2000/svg", 'path')
+//            var transform = document.createElement('g');
+            var transform = document.createElementNS(NS, 'g');
+            transform.setAttribute('transform','translate('+x+',0)');
+            x = x+13;
+            var rect = document.createElementNS(NS,'rect');
+
+            rect.setAttribute('class','day');
+            rect.setAttribute('y','0');
+            rect.setAttribute('width','11');
+            rect.setAttribute('height','11');
+            var color = (!bucket)?'000000':'555555';
+            rect.setAttribute('style','fill: #'+color+';');
+            transform.appendChild(rect);
+            calendar.appendChild(transform);
+            console.log(bucket || '0');
+        });
 
         dates = buckets;
 
