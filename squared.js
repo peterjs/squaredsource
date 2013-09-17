@@ -27,7 +27,26 @@ window.onload = function(e) {
         //filter undefined
         dates = dates.filter(function(d){ return d;});
         //months are 0-11
-        message = dates.map(function(date){return date.getUTCDate() + ' ' + date.getUTCMonth() + ' ' + date.getUTCFullYear();});
+        dates = dates.map(function(date) {
+            var today = new Date();
+            today = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+                return ((today - date)/(24*60*60*1000));
+            }).map(function(diff) {
+                //commits made today are (-1.0,0.0]
+                return Math.floor(365 - diff - 1);
+            });
+
+        //bucket dates
+        var buckets = dates.reduce(function(bucks, day) {
+            if (day < 365) {
+                bucks[day] = (bucks[day] || 0) + 1;
+            }
+            return bucks;
+        }, []);
+
+        dates = buckets;
+
+        message = dates;
         c.textContent = message;
     });
 };
