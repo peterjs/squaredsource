@@ -13,6 +13,11 @@ window.onload = function(e) {
         return hexColors;
     };
 
+    var getColor = function(val, min, max, colormap) {
+        var colorMapMax = colormap.length-1;
+        return colormap[Math.round(val/(max-min)*colorMapMax)];
+    };
+
 //    peter-mbp:squaredsource peter$ /opt/local/bin/git --version
 //    git version 1.8.3.1
 //    peter-mbp:squaredsource peter$ /usr/bin/git --version
@@ -64,6 +69,9 @@ window.onload = function(e) {
         var calendar1 = document.getElementById('calendar');
 //        var calendar = document.createElement('g');
 
+        var minBuckets = Math.min.apply(null, buckets);
+        var maxBuckets = Math.max.apply(null, buckets);
+
         var NS="http://www.w3.org/2000/svg";
         var calendar = document.createElementNS(NS, 'g');
         calendar.setAttribute('transform','translate(20,20)');
@@ -86,7 +94,8 @@ window.onload = function(e) {
                 rect.setAttribute('width','11');
                 rect.setAttribute('height','11');
                 var color = (!bucket)?'000000':'555555';
-                rect.setAttribute('style','fill: #'+color+';');
+                color = getColor(bucket,minBuckets,maxBuckets,colormap());
+                rect.setAttribute('style','fill: '+color+';');
                 transform.appendChild(rect);
                 calendar.appendChild(transform);
                 console.log(bucket || '0');
