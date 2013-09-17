@@ -20,9 +20,14 @@ window.onload = function(e) {
         var message = '';
         //use (var x in a) rather than (x in a) - don't want to create a global
         //All objects in JS are associative
+        var dates = [];
         for (var m in logs) {
-            message += logs[m].message + '\n';
+            dates.push(logs[m].authorDate);
         }
+        //filter undefined
+        dates = dates.filter(function(d){ return d;});
+        //months are 0-11
+        message = dates.map(function(date){return date.getUTCDate() + ' ' + date.getUTCMonth() + ' ' + date.getUTCFullYear();});
         c.textContent = message;
     });
 };
