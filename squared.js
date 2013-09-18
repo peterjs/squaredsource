@@ -1,5 +1,36 @@
 window.onload = function(e) {
 
+    var fs = require('fs');
+
+    //make modules
+    var validGitPath = function(path) {
+        fs.exists(path, function(ex) {
+            var repos = document.getElementById('repos');
+            if (!ex) {
+                repos.setAttribute('style', 'background-color: #f8ccd6;');
+            } else {
+                repos.setAttribute('style', 'background-color: #f1eef6;')
+            }
+        });
+    };
+
+    var repoPath = function() {
+        var repos = document.getElementById('repos');
+        repos.addEventListener('keyup', function() {
+            console.log(repos.value);
+            validGitPath(repos.value);
+        });
+        repos.addEventListener('keydown', function() {
+            var key = event.keyCode || event.charCode;
+            if (key == 8 || key == 46) {
+//                validGitPath(repos.value);
+            }
+            console.log(repos.value);
+            validGitPath(repos.value);
+        });
+    };
+    repoPath();
+
     var colormap = function() {
         //colorbrewer2.org
         var colors = [[241,238,246], [189,201,225], [116,169,207], [42,140,190], [4,90,141]];
