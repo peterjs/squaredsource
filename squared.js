@@ -1,53 +1,5 @@
 window.onload = function(e) {
 
-    var fs = require('fs');
-
-    //make modules
-    var validGitPath = function(path) {
-        fs.exists(path, function(ex) {
-            var repos = document.getElementById('repos');
-            if (!ex) {
-                repos.setAttribute('style', 'background-color: #f8ccd6;');
-            } else {
-                repos.setAttribute('style', 'background-color: #f1eef6;')
-            }
-        });
-    };
-
-    var repoPath = function() {
-        var repos = document.getElementById('repos');
-        repos.addEventListener('keyup', function() {
-            console.log(repos.value);
-            validGitPath(repos.value);
-        });
-        repos.addEventListener('keydown', function() {
-            var key = event.keyCode || event.charCode;
-            if (key == 8 || key == 46) {
-//                validGitPath(repos.value);
-            }
-            console.log(repos.value);
-            validGitPath(repos.value);
-        });
-    };
-    repoPath();
-
-    var colormap = function() {
-        //colorbrewer2.org
-        var colors = [[241,238,246], [189,201,225], [116,169,207], [42,140,190], [4,90,141]];
-        var hexColors = colors.map(function (c) {
-            return c.reduce(function (hexColor, val) {
-               var hexVal = val.toString(16);
-               if (val < 16) hexVal = '0' + hexVal;
-               return hexColor + hexVal;
-            }, '#');
-        });
-        return hexColors;
-    };
-
-    var getColor = function(val, min, max, colormap) {
-        var colorMapMax = colormap.length-1;
-        return colormap[Math.round(val/(max-min)*colorMapMax)];
-    };
 
 //    peter-mbp:squaredsource peter$ /opt/local/bin/git --version
 //    git version 1.8.3.1
@@ -62,10 +14,12 @@ window.onload = function(e) {
 
     var gw = require('./lib/gitWrapper');
 
+    var makeCalendar = function(path) {
     var c = document.getElementById('c');
     c.textContent = "hello";
 
-    gw.log(".", function(err, logs) {
+    gw.log(path, function(err, logs) {
+        if (!err) {
         console.log(logs);
         //use (var x in a) rather than (x in a) - don't want to create a global
         //All objects in JS are associative
@@ -136,5 +90,61 @@ window.onload = function(e) {
         }
 
         c.textContent = buckets;
+        }
     });
+    };
+
+    var fs = require('fs');
+
+    //make modules
+    var lastPath = '';
+    var validGitPath = function(path) {
+        fs.exists(path, function(ex) {
+            var repos = document.getElementById('repos');
+            if (!ex) {
+                repos.setAttribute('style', 'background-color: #f8ccd6;');
+            } else {
+                repos.setAttribute('style', 'background-color: #f1eef6;')
+                if (path !== lastPath) {
+                    makeCalendar(path);
+                }
+                lastPath = path;
+            }
+        });
+    };
+
+    var repoPath = function() {
+        var repos = document.getElementById('repos');
+        repos.addEventListener('keyup', function() {
+            console.log(repos.value);
+            validGitPath(repos.value);
+        });
+        repos.addEventListener('keydown', function() {
+            var key = event.keyCode || event.charCode;
+            if (key == 8 || key == 46) {
+//                validGitPath(repos.value);
+            }
+            console.log(repos.value);
+            validGitPath(repos.value);
+        });
+    };
+    repoPath();
+
+    var colormap = function() {
+        //colorbrewer2.org
+        var colors = [[241,238,246], [189,201,225], [116,169,207], [42,140,190], [4,90,141]];
+        var hexColors = colors.map(function (c) {
+            return c.reduce(function (hexColor, val) {
+               var hexVal = val.toString(16);
+               if (val < 16) hexVal = '0' + hexVal;
+               return hexColor + hexVal;
+            }, '#');
+        });
+        return hexColors;
+    };
+
+    var getColor = function(val, min, max, colormap) {
+        var colorMapMax = colormap.length-1;
+        return colormap[Math.round(val/(max-min)*colorMapMax)];
+    };
 };
