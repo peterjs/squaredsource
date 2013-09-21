@@ -172,5 +172,6 @@ window.onload = function(e) {
     var baconButton = document.getElementById('baconbutton');
 //    var baconEventStream = baconButton.asEventStream('click');
 //    baconEventStream.onValue(function() {alert('hello frp!')});
-    Bacon.fromEventTarget(baconButton, "click").onValue(function() { alert("Hello Bacon!") });
+    var baconEventStream = Bacon.fromEventTarget(baconButton, "click");
+    baconEventStream.onValue(function() { alert("Hello Bacon!") });
 };
