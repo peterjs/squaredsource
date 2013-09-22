@@ -168,10 +168,6 @@ window.onload = function(e) {
         return colormap[Math.round(val/(max-min)*colorMapMax)];
     };
 
-//    require('baconjs');
-    var baconButton = document.getElementById('baconbutton');
-//    var baconEventStream = baconButton.asEventStream('click');
-//    baconEventStream.onValue(function() {alert('hello frp!')});
     var baconEventStream = Bacon.fromEventTarget(baconButton, 'click');
     baconEventStream.log();
 //    baconEventStream.onValue(function() { alert("Hello Bacon!") });
@@ -185,8 +181,6 @@ window.onload = function(e) {
         return 1;
     });
     userEvenetStream.log('stream:');
-//    var userProperty = userEvenetStream.toProperty('');
-//    userProperty.log('property:');
 
     setTimeout(function() {console.log('to property'); console.log(userEvenetStream.log());}, 10000);
 
@@ -194,7 +188,6 @@ window.onload = function(e) {
 
     var userProperty = userEvenetStream.scan(0, function(a, b) {return a+b;});
     userProperty.log('property:');
-
 
 //    var userFilter = function() {
 //        var user = document.getElementById('user');
