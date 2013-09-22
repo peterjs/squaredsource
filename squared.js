@@ -131,24 +131,24 @@ window.onload = function(e) {
     };
     repoPath();
 
-    var userFilter = function() {
-        var user = document.getElementById('user');
-        user.addEventListener('keyup', function() {
-//            console.log(user.value);
-            lastUser = user;
-            makeCalendar(path, lastUser);
-        });
-        repos.addEventListener('keydown', function() {
-            var key = event.keyCode || event.charCode;
-            if (key == 8 || key == 46) {
-//                validGitPath(repos.value);
-            }
-//            console.log(user.value);
-            lastUser = user;
-            makeCalendar(path, lastUser);
-        });
-    };
-    userFilter();
+//    var userFilter = function() {
+//        var user = document.getElementById('user');
+//        user.addEventListener('keyup', function() {
+////            console.log(user.value);
+//            lastUser = user;
+//            makeCalendar(path, lastUser);
+//        });
+//        repos.addEventListener('keydown', function() {
+//            var key = event.keyCode || event.charCode;
+//            if (key == 8 || key == 46) {
+////                validGitPath(repos.value);
+//            }
+////            console.log(user.value);
+//            lastUser = user;
+//            makeCalendar(path, lastUser);
+//        });
+//    };
+//    userFilter();
 
     var colormap = function() {
         //colorbrewer2.org
@@ -172,6 +172,36 @@ window.onload = function(e) {
     var baconButton = document.getElementById('baconbutton');
 //    var baconEventStream = baconButton.asEventStream('click');
 //    baconEventStream.onValue(function() {alert('hello frp!')});
-    var baconEventStream = Bacon.fromEventTarget(baconButton, "click");
-    baconEventStream.onValue(function() { alert("Hello Bacon!") });
+    var baconEventStream = Bacon.fromEventTarget(baconButton, 'click');
+    baconEventStream.log();
+//    baconEventStream.onValue(function() { alert("Hello Bacon!") });
+
+    var logStream = document.getElementById('log_stream');
+    var logProperty = document.getElementById('log_property');
+
+    var userField = document.getElementById('user');
+    var userEvenetStream = Bacon.fromEventTarget(userField, 'keyup').map(function(event) {
+//        return event.target.value;
+        return 1;
+    });
+    userEvenetStream.log('stream:');
+//    var userProperty = userEvenetStream.toProperty('');
+//    userProperty.log('property:');
+
+    setTimeout(function() {console.log('to property'); console.log(userEvenetStream.log());}, 10000);
+
+    userEvenetStream.onValue(function(val) {console.log('val: '); console.log(val);});
+
+    var userProperty = userEvenetStream.scan(0, function(a, b) {return a+b;});
+    userProperty.log('property:');
+
+
+//    var userFilter = function() {
+//        var user = document.getElementById('user');
+//        user.addEventListener('keyup', function(event) {
+//            console.log('something pressed');
+//            console.log(event.target.value);
+//        });
+//    };
+//    userFilter();
 };
