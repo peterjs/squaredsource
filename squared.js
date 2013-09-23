@@ -21,6 +21,8 @@ window.onload = function(e) {
         gw.log(path, function(err, logs) {
             if (!err) {
                 console.log(logs);
+                console.log('user ' + user);
+                logs = logs.filter(function(log) {return (log.hasOwnProperty('author') && (log.author.indexOf(user) == 0));});
                 //use (var x in a) rather than (x in a) - don't want to create a global
                 var dates = logs.map(function(log) {return log.authorDate});
                 //filter undefined
@@ -150,8 +152,10 @@ window.onload = function(e) {
         }
     });
 
-    ok.onValue(function(a) {
-        console.log(a);
-        makeCalendar(a);
+    ok.combine(user, function(p, u) {
+        return {path: p, user:u};
+    }).onValue(function(pu) {
+        console.log(pu.path + ' ' + pu.user);
+        makeCalendar(pu.path, pu.user);
     });
 };
