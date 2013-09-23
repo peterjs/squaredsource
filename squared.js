@@ -113,10 +113,6 @@ window.onload = function(e) {
     };
 
 //    require('baconjs');
-    var baconButton = document.getElementById('baconbutton');
-    var baconEventStream = Bacon.fromEventTarget(baconButton, "click");
-    baconEventStream.onValue(function() { alert("Hello Bacon!") });
-
     function textFieldValue(textField) {
         var textFieldEvenetStream = Bacon.fromEventTarget(textField, 'keyup');
         return textFieldEvenetStream.map(function(event) {
@@ -132,18 +128,11 @@ window.onload = function(e) {
 
     //repo add / - on different platforms as last character
 
-    var validFoldersRepos = repo.flatMapLatest(function(path){
+    var isValidFoldersRepos = repo.flatMapLatest(function(path){
        return Bacon.fromCallback(fs.exists, path);
     });
 
-    //a.sampledBy(b, function);
-    //Like combine, but only outputs a new value on a new value to the b stream.
-    var ok = repo.sampledBy(validFoldersRepos.filter(function(a) {return a;}), function(a, b) {
-//       return 'repo: ' + a + ' ' + b;
-        return a;
-    });
-
-    validFoldersRepos.toProperty(true).onValue(function (valid) {
+    isValidFoldersRepos.toProperty(true).onValue(function (valid) {
         var repoElement = document.getElementById('repos');
         if (valid) {
             repoElement.setAttribute('style', 'background-color: #f1eef6;');
@@ -152,7 +141,12 @@ window.onload = function(e) {
         }
     });
 
-    ok.combine(user, function(p, u) {
+    //a.sampledBy(b, function);
+    //Like combine, but only outputs a new value on a new value to the b stream.
+    //filter - use only true values
+    var okRepos = repo.sampledBy(isValidFoldersRepos.filter(function(a) {return a;}));
+
+    okRepos.combine(user, function(p, u) {
         return {path: p, user:u};
     }).onValue(function(pu) {
         console.log(pu.path + ' ' + pu.user);
