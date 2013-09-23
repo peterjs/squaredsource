@@ -145,9 +145,6 @@ window.onload = function(e) {
         return a;
     });
 
-//    var repos = document.getElementById('repos');
-//    repos.setAttribute('style', 'background-color: #f8ccd6;');
-
     validFoldersRepos.toProperty(true).onValue(function (valid) {
         var repoElement = document.getElementById('repos');
         if (valid) {
