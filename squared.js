@@ -22,11 +22,7 @@ window.onload = function(e) {
             if (!err) {
                 console.log(logs);
                 //use (var x in a) rather than (x in a) - don't want to create a global
-                //All objects in JS are associative
-                var dates = [];
-                for (var m in logs) {
-                    dates.push(logs[m].authorDate);
-                }
+                var dates = logs.map(function(log) {return log.authorDate});
                 //filter undefined
                 dates = dates.filter(function(d){ return d;});
                 //months are 0-11
