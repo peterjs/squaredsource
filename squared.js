@@ -96,24 +96,6 @@ window.onload = function(e) {
 
     var fs = require('fs');
 
-    //make modules
-    var lastUser = '';
-    var lastPath = '';
-    var validGitPath = function(path) {
-        fs.exists(path, function(ex) {
-            var repos = document.getElementById('repos');
-            if (!ex) {
-                repos.setAttribute('style', 'background-color: #f8ccd6;');
-            } else {
-                repos.setAttribute('style', 'background-color: #f1eef6;')
-                if (path !== lastPath) {
-                    makeCalendar(path, lastUser);
-                }
-                lastPath = path;
-            }
-        });
-    };
-
     var colormap = function() {
         //colorbrewer2.org
         var colors = [[241,238,246], [189,201,225], [116,169,207], [42,140,190], [4,90,141]];
@@ -161,6 +143,18 @@ window.onload = function(e) {
     var ok = repo.sampledBy(validFoldersRepos.filter(function(a) {return a;}), function(a, b) {
 //       return 'repo: ' + a + ' ' + b;
         return a;
+    });
+
+//    var repos = document.getElementById('repos');
+//    repos.setAttribute('style', 'background-color: #f8ccd6;');
+
+    validFoldersRepos.toProperty(true).onValue(function (valid) {
+        var repoElement = document.getElementById('repos');
+        if (valid) {
+            repoElement.setAttribute('style', 'background-color: #f1eef6;');
+        } else {
+            repoElement.setAttribute('style', 'background-color: #f8ccd6;');
+        }
     });
 
     ok.onValue(function(a) {
