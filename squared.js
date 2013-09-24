@@ -22,9 +22,9 @@ window.onload = function(e) {
             if (!err) {
 //                console.log(logs);
 //                console.log('user ' + user);
-                logs = logs.filter(function(log) {return (log.hasOwnProperty('author') && (log.author.indexOf(user) == 0));});
+                logs = logs.filter(function(log) {return (log.hasOwnProperty('author') && (log.author.indexOf(user) === 0));});
                 //use (var x in a) rather than (x in a) - don't want to create a global
-                var dates = logs.map(function(log) {return log.authorDate});
+                var dates = logs.map(function(log) {return log.authorDate;});
                 //filter undefined
                 dates = dates.filter(function(d){ return d;});
                 //months are 0-11
@@ -104,7 +104,7 @@ window.onload = function(e) {
         var hexColors = colors.map(function (c) {
             return c.reduce(function (hexColor, val) {
                 var hexVal = val.toString(16);
-                if (val < 16) hexVal = '0' + hexVal;
+                if (val < 16) {hexVal = '0' + hexVal;}
                 return hexColor + hexVal;
             }, '#');
         });
@@ -154,24 +154,15 @@ window.onload = function(e) {
         }
     });
 
-    //a.sampledBy(b, function);
-    //Like combine, but only outputs a new value on a new value to the b stream.
-    //filter - use only true values
-    var okRepos = repo.sampledBy(isValidFoldersRepos.filter(function(a) {return a;}));
-
-//    okRepos.combine(user, function(p, u) {
-//        return {path: p, user:u};
-//    }).onValue(function(pu) {
-//            console.log(pu.path + ' ' + pu.user);
-//            makeCalendar(pu.path, pu.user);
-//        });
-
     var addButton = document.getElementById('addButton');
     var addEventStream = Bacon.fromEventTarget(addButton, 'click');
     var enterEventStream = Bacon.fromEventTarget(repoTextField, 'keydown').filter(function (key) {return (key.keyCode === 13);}).map(true);
 
     addEventStream = addEventStream.merge(enterEventStream);
 
+    //a.sampledBy(b, function);
+    //Like combine, but only outputs a new value on a new value to the b stream.
+    //filter - use only true values
     //stream.map(property) maps the stream events to the current value of the given property. This is equivalent to property.sampledBy(stream).
     var repoListStream = isValidFoldersRepos.sampledBy(addEventStream).filter(function (a) {return a;}).map(repo);
 
