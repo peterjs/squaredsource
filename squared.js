@@ -20,8 +20,8 @@ window.onload = function(e) {
 
         gw.log(path, function(err, logs) {
             if (!err) {
-                console.log(logs);
-                console.log('user ' + user);
+//                console.log(logs);
+//                console.log('user ' + user);
                 logs = logs.filter(function(log) {return (log.hasOwnProperty('author') && (log.author.indexOf(user) == 0));});
                 //use (var x in a) rather than (x in a) - don't want to create a global
                 var dates = logs.map(function(log) {return log.authorDate});
@@ -81,7 +81,7 @@ window.onload = function(e) {
                         rect.setAttribute('style','fill: '+color+';');
                         transform.appendChild(rect);
                         calendar.appendChild(transform);
-                        console.log(bucket || '0');
+//                        console.log(bucket || '0');
                         currentDay = currentDay - 1;
                     }
                     lastDayInColumn = 6;
@@ -128,11 +128,20 @@ window.onload = function(e) {
 
     //repo add / - on different platforms as last character
 
-    var isValidFoldersRepos = repo.flatMapLatest(function(path){
+    var isValidFoldersReposFsExists = repo.flatMapLatest(function(path){
         return Bacon.fromCallback(fs.exists, path);
     });
 
-    isValidFoldersRepos.toProperty(true).onValue(function (valid) {
+    var t = function(x) {return x;};
+    var toBool = function(x) {if (x) {return true;} else {return false;}};
+
+    var isValidFoldersReposGetStatus = repo.sampledBy(isValidFoldersReposFsExists.filter(t)).flatMapLatest(function(path){
+        return Bacon.fromNodeCallback(gw.getStatus, path);
+    }).map(toBool).mapError(function(a){return false;}).toProperty(false);
+
+    var isValidFoldersRepos = isValidFoldersReposFsExists.toProperty(false).and(isValidFoldersReposGetStatus);
+
+    isValidFoldersRepos.onValue(function (valid) {
         var repoElement = document.getElementById('repos');
         if (valid) {
             repoElement.setAttribute('style', 'background-color: #f1eef6;');
@@ -160,15 +169,11 @@ window.onload = function(e) {
     addEventStream = addEventStream.merge(enterEventStream);
 
     //stream.map(property) maps the stream events to the current value of the given property. This is equivalent to property.sampledBy(stream).
-    var repoListStream = isValidFoldersRepos.toProperty(false).sampledBy(addEventStream).filter(function (a) {return a;}).map(repo);
-
-    repoListStream.onValue(function(r) {
-//        alert('hello lo');
-    });
+    var repoListStream = isValidFoldersRepos.sampledBy(addEventStream).filter(function (a) {return a;}).map(repo);
 
     var addedReposProp = repoListStream.scan([], function(oldRepos, newRepo) {
         //push returns the length of the array, concat returns the new array
-        return oldRepos.concat([newRepo]);
+        return oldRepos.indexOf(newRepo)>=0?oldRepos:oldRepos.concat([newRepo]);
     });
 
     addedReposProp.onValue(function(repoArray) {
