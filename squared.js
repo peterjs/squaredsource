@@ -116,7 +116,7 @@ window.onload = function(e) {
     function textFieldValue(textField) {
         var textFieldEvenetStream = Bacon.fromEventTarget(textField, 'keyup');
         return textFieldEvenetStream.map(function(event) {
-           return event.target.value;
+            return event.target.value;
         });
     }
 
@@ -129,7 +129,7 @@ window.onload = function(e) {
     //repo add / - on different platforms as last character
 
     var isValidFoldersRepos = repo.flatMapLatest(function(path){
-       return Bacon.fromCallback(fs.exists, path);
+        return Bacon.fromCallback(fs.exists, path);
     });
 
     isValidFoldersRepos.toProperty(true).onValue(function (valid) {
@@ -149,7 +149,39 @@ window.onload = function(e) {
     okRepos.combine(user, function(p, u) {
         return {path: p, user:u};
     }).onValue(function(pu) {
-        console.log(pu.path + ' ' + pu.user);
-        makeCalendar(pu.path, pu.user);
+            console.log(pu.path + ' ' + pu.user);
+            makeCalendar(pu.path, pu.user);
+        });
+
+    var addButton = document.getElementById('addButton');
+    var addEventStream = Bacon.fromEventTarget(addButton, 'click');
+    var enterEventStream = Bacon.fromEventTarget(repoTextField, 'keydown').filter(function (key) {return (key.keyCode === 13);}).map(true);
+
+    addEventStream = addEventStream.merge(enterEventStream);
+
+    //stream.map(property) maps the stream events to the current value of the given property. This is equivalent to property.sampledBy(stream).
+    var repoListStream = isValidFoldersRepos.toProperty(false).sampledBy(addEventStream).filter(function (a) {return a;}).map(repo);
+
+    repoListStream.onValue(function(r) {
+//        alert('hello lo');
+    });
+
+    var addedReposProp = repoListStream.scan([], function(oldRepos, newRepo) {
+        //push returns the length of the array, concat returns the new array
+        return oldRepos.concat([newRepo]);
+    });
+
+    addedReposProp.onValue(function(repoArray) {
+        var repoListElem = document.getElementById('repo_list');
+        while (repoListElem.firstChild) {
+            repoListElem.removeChild(repoListElem.firstChild);
+        }
+        var listElem = document.createElement('ul');
+        repoListElem.appendChild(listElem);
+        repoArray.forEach(function(repo) {
+            var repoElem = document.createElement('li');
+            repoElem.textContent = repo;
+            repoListElem.appendChild(repoElem);
+        });
     });
 };
