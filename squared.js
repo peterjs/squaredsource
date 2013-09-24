@@ -14,7 +14,7 @@ window.onload = function(e) {
 
     var gw = require('./lib/gitWrapper');
 
-    var makeCalendar = function(path, user) {
+    var makeCalendar = function(path, user, element) {
         var c = document.getElementById('c');
         c.textContent = "hello";
 
@@ -49,18 +49,22 @@ window.onload = function(e) {
                     return bucks;
                 }, zeros);
 
-                var calendar1 = document.getElementById('calendar');
-//        var calendar = document.createElement('g');
+                var NS="http://www.w3.org/2000/svg";
+
+                var calendarSvgElem = document.createElementNS(NS,'svg');
+                calendarSvgElem.setAttribute('width', '900');
+                calendarSvgElem.setAttribute('height', '110');
 
                 var minBuckets = Math.min.apply(null, buckets);
                 var maxBuckets = Math.max.apply(null, buckets);
 
-                var NS="http://www.w3.org/2000/svg";
                 var calendar = document.createElementNS(NS, 'g');
-                calendar.setAttribute('transform','translate(20,20)');
-                calendar1.appendChild(calendar);
-                var lastDayInColumn = new Date().getUTCDay();
+                calendarSvgElem.appendChild(calendar);
+                element.appendChild(calendarSvgElem);
 
+                calendar.setAttribute('transform','translate(20,20)');
+
+                var lastDayInColumn = new Date().getUTCDay();
                 var currentDay = days-1;
                 for (var column = Math.ceil(days/7); column >= 0; column--) {
                     for (var row = lastDayInColumn; row >= 0 && currentDay >= 0; row--) {
@@ -155,12 +159,12 @@ window.onload = function(e) {
     //filter - use only true values
     var okRepos = repo.sampledBy(isValidFoldersRepos.filter(function(a) {return a;}));
 
-    okRepos.combine(user, function(p, u) {
-        return {path: p, user:u};
-    }).onValue(function(pu) {
-            console.log(pu.path + ' ' + pu.user);
-            makeCalendar(pu.path, pu.user);
-        });
+//    okRepos.combine(user, function(p, u) {
+//        return {path: p, user:u};
+//    }).onValue(function(pu) {
+//            console.log(pu.path + ' ' + pu.user);
+//            makeCalendar(pu.path, pu.user);
+//        });
 
     var addButton = document.getElementById('addButton');
     var addEventStream = Bacon.fromEventTarget(addButton, 'click');
@@ -176,17 +180,25 @@ window.onload = function(e) {
         return oldRepos.indexOf(newRepo)>=0?oldRepos:oldRepos.concat([newRepo]);
     });
 
-    addedReposProp.onValue(function(repoArray) {
-        var repoListElem = document.getElementById('repo_list');
-        while (repoListElem.firstChild) {
-            repoListElem.removeChild(repoListElem.firstChild);
-        }
-        var listElem = document.createElement('ul');
-        repoListElem.appendChild(listElem);
-        repoArray.forEach(function(repo) {
-            var repoElem = document.createElement('li');
-            repoElem.textContent = repo;
-            repoListElem.appendChild(repoElem);
+    addedReposProp.combine(user, function(p, u) {
+        return {path: p, user:u};
+    }).onValue(function(pu) {
+            var repoArray = pu.path;
+
+            var repoListElem = document.getElementById('repo_list');
+            while (repoListElem.firstChild) {
+                repoListElem.removeChild(repoListElem.firstChild);
+            }
+            var listElem = document.createElement('ul');
+            repoListElem.appendChild(listElem);
+            repoArray.forEach(function(repo) {
+                var repoElem = document.createElement('li');
+                repoElem.textContent = repo;
+                repoListElem.appendChild(repoElem);
+
+                var repoCalendarElem = document.createElement('div');
+                makeCalendar(repo, pu.user, repoCalendarElem);
+                repoListElem.appendChild(repoCalendarElem);
+            });
         });
-    });
 };
