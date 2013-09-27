@@ -116,29 +116,6 @@ window.onload = function(e) {
         return colormap[Math.round(val/(max-min)*colorMapMax)];
     };
 
-    function SquaredModel() {
-        //public in
-        this.repoAdded = new Bacon.Bus();
-
-        function addRepo (newRepo) {return function (repos) {return repos.concat([newRepo]);};}
-        var modifications = this.repoAdded.map(addRepo);
-        //public out
-        this.allRepos = modifications.scan([], function (repos, modification) {return modification(repos);});
-//        this.allRepos.log();
-    }
-
-    function SquaredView(model) {
-        model.allRepos.onValue(function(val) {
-            console.log('view got ' + val);
-        });
-    }
-
-    var model = new SquaredModel();
-    var view = new SquaredView(model);
-
-    model.repoAdded.push('test string');
-    model.repoAdded.push(4);
-
 //    require('baconjs');
     function textFieldValue(textField) {
         var textFieldEvenetStream = Bacon.fromEventTarget(textField, 'keyup');
@@ -215,6 +192,26 @@ window.onload = function(e) {
                 repoListElem.appendChild(repoCalendarElem);
             });
         });
+
+    function SquaredModel() {
+        //public in
+        this.repoAdded = new Bacon.Bus();
+
+        function addRepo (newRepo) {return function (repos) {return repos.concat([newRepo]);};}
+        var modifications = this.repoAdded.map(addRepo);
+        //public out
+        this.allRepos = modifications.scan([], function (repos, modification) {return modification(repos);});
+//        this.allRepos.log();
+    }
+
+    function SquaredView(model) {
+        model.allRepos.onValue(function(val) {
+            console.log('view got ' + val);
+        });
+    }
+
+//    model.repoAdded.push('test string');
+//    model.repoAdded.push(4);
 
     function SquaredApp() {
         var model = new SquaredModel();
