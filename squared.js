@@ -215,4 +215,12 @@ window.onload = function(e) {
                 repoListElem.appendChild(repoCalendarElem);
             });
         });
+
+    function SquaredApp() {
+        var model = new SquaredModel();
+        var view = new SquaredView(model);
+        model.repoAdded.plug(repoListStream);
+    }
+
+    new SquaredApp();
 };
