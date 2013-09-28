@@ -204,6 +204,22 @@ window.onload = function(e) {
 //        this.allRepos.log();
     }
 
+    function RepositoryView() {
+
+    }
+
+    function RepositoryListView() {
+
+    }
+
+    function NewRepositoryView() {
+
+    }
+
+    function UserFilterView() {
+        
+    }
+
     function SquaredView(model) {
         model.allRepos.onValue(function(val) {
             console.log('view got ' + val);
