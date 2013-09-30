@@ -106,8 +106,8 @@ window.onload = function(e) {
 
             gw.log(path, function(err, logs) {
                 if (!err) {
-    //                console.log(logs);
-    //                console.log('user ' + user);
+                    //                console.log(logs);
+                    //                console.log('user ' + user);
                     logs = logs.filter(function(log) {return (log.hasOwnProperty('author') && (log.author.indexOf(user) === 0));});
                     //use (var x in a) rather than (x in a) - don't want to create a global
                     var dates = logs.map(function(log) {return log.authorDate;});
@@ -126,7 +126,7 @@ window.onload = function(e) {
 
                     //bucket dates
 
-    //        var zeros = new Array(days).
+                    //        var zeros = new Array(days).
                     var zeros = Array.apply(null, new Array(days)).map(Number.prototype.valueOf,0);
                     var buckets = dates.reduce(function(bucks, day) {
                         if (day < days) {
@@ -171,7 +171,7 @@ window.onload = function(e) {
                             rect.setAttribute('style','fill: '+color+';');
                             transform.appendChild(rect);
                             calendar.appendChild(transform);
-    //                        console.log(bucket || '0');
+                            //                        console.log(bucket || '0');
                             currentDay = currentDay - 1;
                         }
                         lastDayInColumn = 6;
@@ -184,43 +184,42 @@ window.onload = function(e) {
 
     }
 
-    function RepositoryListView(listElement, model) {
+    function RepositoryListView(repoListElem, model) {
 //        function render(repos) {
 //            listElement.children().remove();
 //            repos.forEach(addRepo);
 //        }
 
-        function addRepo(repo) {
+        function addRepo(pu) {
             console.log('adding repo ' + repo);
+            var repoArray = pu.path;
 
+            while (repoListElem.firstChild) {
+                repoListElem.removeChild(repoListElem.firstChild);
+            }
+            var listElem = document.createElement('ul');
+            repoListElem.appendChild(listElem);
+            repoArray.forEach(function(repo) {
+                var repoElem = document.createElement('li');
+                repoElem.textContent = repo;
+                repoListElem.appendChild(repoElem);
+
+                var repoCalendarElem = document.createElement('div');
+                var repoView = new RepositoryView(repo);
+                repoView.makeCalendar(repo, pu.user, repoCalendarElem);
+                repoListElem.appendChild(repoCalendarElem);
+            });
         }
 
-        model.repoAdded.onValue(function(repo){
-                addRepo(repo);
-            }
-        );
+//        model.repoAdded.onValue(function(repo){
+//                addRepo(repo);
+//            }
+//        );
 
         addedReposProp.combine(model.user, function(p, u) {
             return {path: p, user:u};
         }).onValue(function(pu) {
-                var repoArray = pu.path;
-
-                var repoListElem = document.getElementById('repo_list');
-                while (repoListElem.firstChild) {
-                    repoListElem.removeChild(repoListElem.firstChild);
-                }
-                var listElem = document.createElement('ul');
-                repoListElem.appendChild(listElem);
-                repoArray.forEach(function(repo) {
-                    var repoElem = document.createElement('li');
-                    repoElem.textContent = repo;
-                    repoListElem.appendChild(repoElem);
-
-                    var repoCalendarElem = document.createElement('div');
-                    var repoView = new RepositoryView(repo);
-                    repoView.makeCalendar(repo, pu.user, repoCalendarElem);
-                    repoListElem.appendChild(repoCalendarElem);
-                });
+                addRepo(pu);
             });
 
 //        var repaint = model.repoDeleted;
@@ -243,7 +242,8 @@ window.onload = function(e) {
     function SquaredApp() {
         var model = new SquaredModel();
         model.repoAdded.plug(repoListStream);
-        var repoListView = new RepositoryListView('',model);
+        var repoListElem = document.getElementById('repo_list');
+        var repoListView = new RepositoryListView(repoListElem,model);
         var filterView = new UserFilterView(model);
     }
 
