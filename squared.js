@@ -22,10 +22,8 @@ window.onload = function(e) {
         });
     }
 
-    var userTextField = document.getElementById('user');
     var repoTextField = document.getElementById('repos');
 
-    var user = textFieldValue(userTextField).toProperty('me').skipDuplicates();
     var repo = textFieldValue(repoTextField).toProperty('.').skipDuplicates();
 
     //repo add / - on different platforms as last character
@@ -72,6 +70,7 @@ window.onload = function(e) {
     function SquaredModel() {
         //public in
         this.repoAdded = new Bacon.Bus();
+        this.user = new Bacon.Bus();
 
         function addRepo (newRepo) {return function (repos) {return repos.concat([newRepo]);};}
         var modifications = this.repoAdded.map(addRepo);
@@ -201,7 +200,7 @@ window.onload = function(e) {
             }
         );
 
-        addedReposProp.combine(user, function(p, u) {
+        addedReposProp.combine(model.user, function(p, u) {
             return {path: p, user:u};
         }).onValue(function(pu) {
                 var repoArray = pu.path;
@@ -232,8 +231,10 @@ window.onload = function(e) {
 
     }
 
-    function UserFilterView() {
-
+    function UserFilterView(model) {
+        var userTextField = document.getElementById('user');
+        var user = textFieldValue(userTextField).toProperty('me').skipDuplicates();
+        model.user.plug(user);
     }
 
 //    model.repoAdded.push('test string');
@@ -241,8 +242,9 @@ window.onload = function(e) {
 
     function SquaredApp() {
         var model = new SquaredModel();
-        var view = new RepositoryListView('',model);
         model.repoAdded.plug(repoListStream);
+        var repoListView = new RepositoryListView('',model);
+        var filterView = new UserFilterView(model);
     }
 
     new SquaredApp();
