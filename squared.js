@@ -13,59 +13,17 @@ window.onload = function(e) {
     console.log('found git: ' + gitExeFilename);
 
     var fs = require('fs');
+    var gw = require('./lib/gitWrapper');
 
-//    require('baconjs');
+    var t = function(x) {return x;};
+    var toBool = function(x) {if (x) {return true;} else {return false;}};
+
     function textFieldValue(textField) {
         var textFieldEvenetStream = Bacon.fromEventTarget(textField, 'keyup');
         return textFieldEvenetStream.map(function(event) {
             return event.target.value;
         });
     }
-
-    var repoTextField = document.getElementById('repos');
-
-    var repo = textFieldValue(repoTextField).toProperty('.').skipDuplicates();
-
-    //repo add / - on different platforms as last character
-
-    var isValidFoldersReposFsExists = repo.flatMapLatest(function(path){
-        return Bacon.fromCallback(fs.exists, path);
-    });
-
-    var t = function(x) {return x;};
-    var toBool = function(x) {if (x) {return true;} else {return false;}};
-    var gw = require('./lib/gitWrapper');
-    var isValidFoldersReposGetStatus = repo.sampledBy(isValidFoldersReposFsExists.filter(t)).flatMapLatest(function(path){
-        return Bacon.fromNodeCallback(gw.getStatus, path);
-    }).map(toBool).mapError(function(a){return false;}).toProperty(false);
-
-    var isValidFoldersRepos = isValidFoldersReposFsExists.toProperty(false).and(isValidFoldersReposGetStatus);
-
-    isValidFoldersRepos.onValue(function (valid) {
-        var repoElement = document.getElementById('repos');
-        if (valid) {
-            repoElement.setAttribute('style', 'background-color: #f1eef6;');
-        } else {
-            repoElement.setAttribute('style', 'background-color: #f8ccd6;');
-        }
-    });
-
-    var addButton = document.getElementById('addButton');
-    var addEventStream = Bacon.fromEventTarget(addButton, 'click');
-    var enterEventStream = Bacon.fromEventTarget(repoTextField, 'keydown').filter(function (key) {return (key.keyCode === 13);}).map(true);
-
-    addEventStream = addEventStream.merge(enterEventStream);
-
-    //a.sampledBy(b, function);
-    //Like combine, but only outputs a new value on a new value to the b stream.
-    //filter - use only true values
-    //stream.map(property) maps the stream events to the current value of the given property. This is equivalent to property.sampledBy(stream).
-    var repoListStream = isValidFoldersRepos.sampledBy(addEventStream).filter(function (a) {return a;}).map(repo);
-
-    var addedReposProp = repoListStream.scan([], function(oldRepos, newRepo) {
-        //push returns the length of the array, concat returns the new array
-        return oldRepos.indexOf(newRepo)>=0?oldRepos:oldRepos.concat([newRepo]);
-    });
 
     function SquaredModel() {
         //public in
@@ -191,15 +149,15 @@ window.onload = function(e) {
 //        }
 
         function addRepo(pu) {
-            console.log('adding repo ' + repo);
-            var repoArray = pu.path;
+            console.log('adding repo ' + pu.path);
+            var repo = pu.path;
 
             while (repoListElem.firstChild) {
                 repoListElem.removeChild(repoListElem.firstChild);
             }
             var listElem = document.createElement('ul');
             repoListElem.appendChild(listElem);
-            repoArray.forEach(function(repo) {
+//            repoArray.forEach(function(repo) {
                 var repoElem = document.createElement('li');
                 repoElem.textContent = repo;
                 repoListElem.appendChild(repoElem);
@@ -208,7 +166,7 @@ window.onload = function(e) {
                 var repoView = new RepositoryView(repo);
                 repoView.makeCalendar(repo, pu.user, repoCalendarElem);
                 repoListElem.appendChild(repoCalendarElem);
-            });
+//            });
         }
 
 //        model.repoAdded.onValue(function(repo){
@@ -216,7 +174,8 @@ window.onload = function(e) {
 //            }
 //        );
 
-        addedReposProp.combine(model.user, function(p, u) {
+//        addedReposProp.combine(model.user, function(p, u) {
+        model.repoAdded.combine(model.user, function(p, u) {
             return {path: p, user:u};
         }).onValue(function(pu) {
                 addRepo(pu);
@@ -226,8 +185,51 @@ window.onload = function(e) {
 //        repaint.onValue(render);
     }
 
-    function NewRepositoryView() {
+    function AddNewRepositoryView(model) {
 
+        var repoTextField = document.getElementById('repos');
+        var repo = textFieldValue(repoTextField).toProperty('.').skipDuplicates();
+        //repo add / - on different platforms as last character
+
+        var isValidFoldersReposFsExists = repo.flatMapLatest(function(path){
+            return Bacon.fromCallback(fs.exists, path);
+        });
+
+        var isValidFoldersReposGetStatus = repo.sampledBy(isValidFoldersReposFsExists.filter(t)).flatMapLatest(function(path){
+            return Bacon.fromNodeCallback(gw.getStatus, path);
+        }).map(toBool).mapError(function(a){return false;}).toProperty(false);
+
+        var isValidFoldersRepos = isValidFoldersReposFsExists.toProperty(false).and(isValidFoldersReposGetStatus);
+
+        isValidFoldersRepos.onValue(function (valid) {
+            var repoElement = document.getElementById('repos');
+            if (valid) {
+                repoElement.setAttribute('style', 'background-color: #f1eef6;');
+            } else {
+                repoElement.setAttribute('style', 'background-color: #f8ccd6;');
+            }
+        });
+
+        var addButton = document.getElementById('addButton');
+        var addEventStream = Bacon.fromEventTarget(addButton, 'click');
+        var enterEventStream = Bacon.fromEventTarget(repoTextField, 'keydown').filter(function (key) {return (key.keyCode === 13);}).map(true);
+
+        addEventStream = addEventStream.merge(enterEventStream);
+
+        //a.sampledBy(b, function);
+        //Like combine, but only outputs a new value on a new value to the b stream.
+        //filter - use only true values
+        //stream.map(property) maps the stream events to the current value of the given property. This is equivalent to property.sampledBy(stream).
+        var repoListStream = isValidFoldersRepos.sampledBy(addEventStream).filter(function (a) {return a;}).map(repo);
+
+        var addedReposProp = repoListStream.scan([], function(oldRepos, newRepo) {
+            //push returns the length of the array, concat returns the new array
+            return oldRepos.indexOf(newRepo)>=0?oldRepos:oldRepos.concat([newRepo]);
+        });
+
+        model.repoAdded.plug(repoListStream);
+
+//        plug it to model.repoadded
     }
 
     function UserFilterView(model) {
@@ -241,10 +243,11 @@ window.onload = function(e) {
 
     function SquaredApp() {
         var model = new SquaredModel();
-        model.repoAdded.plug(repoListStream);
+//        model.repoAdded.plug(repoListStream);
         var repoListElem = document.getElementById('repo_list');
         var repoListView = new RepositoryListView(repoListElem,model);
         var filterView = new UserFilterView(model);
+        var addRepoView = new AddNewRepositoryView(model);
     }
 
     new SquaredApp();
