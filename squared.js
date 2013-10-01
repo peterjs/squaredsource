@@ -1,14 +1,14 @@
 window.onload = function(e) {
 
 
-//    peter-mbp:squaredsource peter$ /opt/local/bin/git --version
-//    git version 1.8.3.1
-//    peter-mbp:squaredsource peter$ /usr/bin/git --version
-//    git version 1.7.5.4
-//require at least git 1.8.3.1
+    //peter-mbp:squaredsource peter$ /opt/local/bin/git --version
+    //git version 1.8.3.1
+    //peter-mbp:squaredsource peter$ /usr/bin/git --version
+    //git version 1.7.5.4
+    //require at least git 1.8.3.1
 
     var which = require('which');
-//    var gitExeFilename = which.sync('git');
+    //    var gitExeFilename = which.sync('git');
     var gitExeFilename = '/opt/local/bin/git';
     console.log('found git: ' + gitExeFilename);
 
@@ -34,10 +34,16 @@ window.onload = function(e) {
         var modifications = this.repoAdded.map(addRepo);
         //public out
         this.allRepos = modifications.scan([], function (repos, modification) {return modification(repos);});
-//        this.allRepos.log();
+        this.userProp = this.user.toProperty();
+
+        var changes;
+
+        //this.repoAdded.log('repo added: ');
+        this.user.log('user added: ');
+        this.userProp.log('user property: ');
     }
 
-    function RepositoryView(repo) {
+    function RepositoryView(path, model) {
         var colormap = function() {
             //colorbrewer2.org
             var colors = [[241,238,246], [189,201,225], [116,169,207], [42,140,190], [4,90,141]];
@@ -56,9 +62,12 @@ window.onload = function(e) {
             return colormap[Math.round(val/(max-min)*colorMapMax)];
         };
 
+        var element = document.createElement('div');
 
-
-        this.makeCalendar = function(path, user, element) {
+        model.userProp.combine(Bacon.once(), function(a,b){return a;}).onValue(function(user) {
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
             var c = document.getElementById('c');
             c.textContent = "hello";
 
@@ -94,8 +103,9 @@ window.onload = function(e) {
                     }, zeros);
 
                     var NS="http://www.w3.org/2000/svg";
-
                     var calendarSvgElem = document.createElementNS(NS,'svg');
+                    element.appendChild(calendarSvgElem);
+
                     calendarSvgElem.setAttribute('width', '900');
                     calendarSvgElem.setAttribute('height', '110');
 
@@ -138,51 +148,41 @@ window.onload = function(e) {
                     c.textContent = buckets;
                 }
             });
-        };
-
+        });
+        this.element = element;
     }
 
     function RepositoryListView(repoListElem, model) {
-//        function render(repos) {
-//            listElement.children().remove();
-//            repos.forEach(addRepo);
-//        }
+        function addRepo(repo) {
+            console.log('adding repo ' + repo);
 
-        function addRepo(pu) {
-            console.log('adding repo ' + pu.path);
-            var repo = pu.path;
-
-            while (repoListElem.firstChild) {
-                repoListElem.removeChild(repoListElem.firstChild);
-            }
             var listElem = document.createElement('ul');
             repoListElem.appendChild(listElem);
-//            repoArray.forEach(function(repo) {
-                var repoElem = document.createElement('li');
-                repoElem.textContent = repo;
-                repoListElem.appendChild(repoElem);
+            var repoElem = document.createElement('li');
+            repoElem.textContent = repo;
+            repoListElem.appendChild(repoElem);
 
-                var repoCalendarElem = document.createElement('div');
-                var repoView = new RepositoryView(repo);
-                repoView.makeCalendar(repo, pu.user, repoCalendarElem);
-                repoListElem.appendChild(repoCalendarElem);
-//            });
+            var repoView = new RepositoryView(repo, model);
+            repoListElem.appendChild(repoView.element);
         }
 
-//        model.repoAdded.onValue(function(repo){
-//                addRepo(repo);
-//            }
-//        );
+        //        model.repoAdded.onValue(function(repo){
+        //                addRepo(repo);
+        //            }
+        //        );
 
-//        addedReposProp.combine(model.user, function(p, u) {
-        model.repoAdded.combine(model.user, function(p, u) {
-            return {path: p, user:u};
-        }).onValue(function(pu) {
-                addRepo(pu);
-            });
+        //        addedReposProp.combine(model.user, function(p, u) {
+//        model.repoAdded.combine(model.user, function(p, u) {
+//            return {path: p, user:u};
+//        }).onValue(function(pu) {
+//                addRepo(pu);
+//            });
+        model.repoAdded.onValue(function(repo){
+            addRepo(repo);
+        });
 
-//        var repaint = model.repoDeleted;
-//        repaint.onValue(render);
+        //        var repaint = model.repoDeleted;
+        //        repaint.onValue(render);
     }
 
     function AddNewRepositoryView(model) {
@@ -228,22 +228,21 @@ window.onload = function(e) {
         });
 
         model.repoAdded.plug(repoListStream);
-
-//        plug it to model.repoadded
     }
 
     function UserFilterView(model) {
         var userTextField = document.getElementById('user');
-        var user = textFieldValue(userTextField).toProperty('me').skipDuplicates();
+        var user = textFieldValue(userTextField).skipDuplicates();
         model.user.plug(user);
+        model.user.push(userTextField.getAttribute('value'));
     }
 
-//    model.repoAdded.push('test string');
-//    model.repoAdded.push(4);
+    //    model.repoAdded.push('test string');
+    //    model.repoAdded.push(4);
 
     function SquaredApp() {
         var model = new SquaredModel();
-//        model.repoAdded.plug(repoListStream);
+        //        model.repoAdded.plug(repoListStream);
         var repoListElem = document.getElementById('repo_list');
         var repoListView = new RepositoryListView(repoListElem,model);
         var filterView = new UserFilterView(model);
