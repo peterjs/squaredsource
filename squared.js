@@ -106,7 +106,7 @@ window.onload = function(e) {
                     var calendarSvgElem = document.createElementNS(NS,'svg');
                     element.appendChild(calendarSvgElem);
 
-                    calendarSvgElem.setAttribute('width', '900');
+                    calendarSvgElem.setAttribute('width', '784');
                     calendarSvgElem.setAttribute('height', '110');
 
                     var minBuckets = Math.min.apply(null, buckets);
