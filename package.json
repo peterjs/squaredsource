@@ -1,4 +1,43 @@
 {
-  "name": "nw-demo",
-  "main": "index.html"
+    "name": "nw-demo",
+    "main": "index.html",
+    "version": "0.1.0",
+    "homepage": "https://github.com/peter/grunt-test",
+    "author": {
+        "name": "Peter Somlo",
+        "email": "peter.somlo@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/peter/grunt-test.git"
+    },
+    "bugs": {
+        "url": "https://github.com/peter/grunt-test/issues"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/peter/grunt-test/blob/master/LICENSE-MIT"
+        }
+    ],
+    "engines": {
+        "node": ">= 0.8.0"
+    },
+    "scripts": {
+        "test": "grunt nodeunit"
+    },
+    "dependencies": {
+        "which": "1.0.5",
+        "async": "0.2.9",
+        "stream-buffers": "0.2.5"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.1",
+        "grunt-contrib-jshint": "~0.6.4",
+        "grunt-contrib-nodeunit": "~0.2.0",
+        "grunt-contrib-watch": "~0.5.3",
+        "grunt-contrib-uglify": "~0.2.2",
+        "grunt-node-webkit-builder": "~0.1.9"
+    },
+    "keywords": []
 }
