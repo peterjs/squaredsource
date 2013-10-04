@@ -64,18 +64,13 @@ window.onload = function(e) {
 
         var element = document.createElement('div');
 
-        var aaa = model.userProp.combine(Bacon.once(), function(a,b){return a;}).flatMapLatest(function(user) {
+        var cal = model.userProp.combine(Bacon.once(), function(a,b){return a;}).flatMapLatest(function(user) {
             return Bacon.fromNodeCallback(gw.log, path).map(function(logs) {
                 while (element.firstChild) {
                     element.removeChild(element.firstChild);
                 }
                 var c = document.getElementById('c');
                 c.textContent = "hello";
-//console.log('heheheheheheheeh dasdoadosadoasodisa');
-//            gw.log(path, function(err, logs) {
-//                if (!err) {
-                //                console.log(logs);
-                //                console.log('user ' + user);
                 logs = logs.filter(function(log) {return (log.hasOwnProperty('author') && (log.author.indexOf(user) === 0));});
                 //use (var x in a) rather than (x in a) - don't want to create a global
                 var dates = logs.map(function(log) {return log.authorDate;});
@@ -147,11 +142,10 @@ window.onload = function(e) {
                 }
 
                 c.textContent = buckets;
-//                }
             });
         });
         this.element = element;
-        aaa.log();
+        cal.onValue(function(val){});
     }
 
     function RepositoryListView(repoListElem, model) {
