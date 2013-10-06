@@ -17,6 +17,18 @@ window.onload = function(e) {
 
     var t = function(x) {return x;};
     var toBool = function(x) {if (x) {return true;} else {return false;}};
+    var isString = function(obj) {
+        var toString = Object.prototype.toString;
+        var test = (toString.call(obj) == '[object String]');
+        console.log('testing ' + test + ' ' + obj);
+        return toString.call(obj) == '[object String]';
+    };
+    var first = function(a,b){return a;};
+    var not = function(x) {
+        return function(arg) {
+            return !x.call(arg);
+        }
+    };
 
     function textFieldValue(textField) {
         var textFieldEvenetStream = Bacon.fromEventTarget(textField, 'keyup');
