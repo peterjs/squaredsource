@@ -61,11 +61,19 @@ window.onload = function(e) {
         //TODO add checking valid git repo to repoAdded
         //TODO replace isString with git repo check... or check this.repoAdded
         this.repoAdded.plug(read.map(JSON.parse).flatMap(function(reposArray){return Bacon.fromArray(reposArray['repos'].filter(isString));}));
+        this.user.plug(read.map(JSON.parse).map(function(state){return state['user'];}));
 
         this.allRepos.sampledBy(this.repoAdded,first).map(function(repos){return {'repos':repos};}).map(JSON.stringify).onValue(function(reposJSON) {
            var write = Bacon.fromNodeCallback(fs.writeFile, 'state.json', reposJSON);
             write.onError(function(err) {console.log('saving failed ' + err);});
         });
+        var persist = Bacon.combineTemplate({
+            repos: this.allRepos.sampledBy(this.repoAdded,first),
+            user: this.userProp
+        }).map(JSON.stringify).onValue(function(reposJSON) {
+                var write = Bacon.fromNodeCallback(fs.writeFile, 'state.json', reposJSON);
+                write.onError(function(err) {console.log('saving failed ' + err);});
+            });
     }
 
     function RepositoryView(path, model) {
@@ -253,6 +261,10 @@ window.onload = function(e) {
 
     function UserFilterView(model) {
         var userTextField = document.getElementById('user');
+        model.userProp.combine(Bacon.once(), first).onValue(function(val)
+        {
+            userTextField.setAttribute('value', val);
+        });
         var user = textFieldValue(userTextField).skipDuplicates();
         model.user.plug(user);
         model.user.push(userTextField.getAttribute('value'));
