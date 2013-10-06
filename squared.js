@@ -60,9 +60,9 @@ window.onload = function(e) {
         //on error, no values are passed here
         //TODO add checking valid git repo to repoAdded
         //TODO replace isString with git repo check... or check this.repoAdded
-        this.repoAdded.plug(read.map(JSON.parse).flatMap(function(reposArray){return Bacon.fromArray(reposArray.filter(isString));}));
+        this.repoAdded.plug(read.map(JSON.parse).flatMap(function(reposArray){return Bacon.fromArray(reposArray['repos'].filter(isString));}));
 
-        this.allRepos.sampledBy(this.repoAdded,first).map(JSON.stringify).onValue(function(reposJSON) {
+        this.allRepos.sampledBy(this.repoAdded,first).map(function(repos){return {'repos':repos};}).map(JSON.stringify).onValue(function(reposJSON) {
            var write = Bacon.fromNodeCallback(fs.writeFile, 'state.json', reposJSON);
             write.onError(function(err) {console.log('saving failed ' + err);});
         });
