@@ -89,7 +89,7 @@ window.onload = function(e) {
 
         var element = document.createElement('div');
 
-        var cal = model.userProp.combine(Bacon.once(), function(a,b){return a;}).flatMapLatest(function(user) {
+        var cal = model.userProp.combine(Bacon.once(), first).flatMapLatest(function(user) {
             return Bacon.fromNodeCallback(gw.log, path).map(function(logs) {
                 while (element.firstChild) {
                     element.removeChild(element.firstChild);
