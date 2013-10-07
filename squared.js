@@ -113,6 +113,10 @@ window.onload = function(e) {
         };
 
         var getColor = function(val, min, max, colormap) {
+            if (max-min <= 0) {
+                max = 100;
+                min = 0;
+            }
             var colorMapMax = colormap.length-1;
             return colormap[Math.round(val/(max-min)*colorMapMax)];
         };
