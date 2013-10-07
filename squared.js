@@ -61,7 +61,7 @@ window.onload = function(e) {
         //TODO add checking valid git repo to repoAdded
         //TODO replace isString with git repo check... or check this.repoAdded
         this.repoAdded.plug(read.map(JSON.parse).flatMap(function(reposArray){return Bacon.fromArray(reposArray['repos'].filter(isString));}));
-        this.user.plug(read.map(JSON.parse).map(function(state){return state['user'];}));
+        this.user.plug(read.map(JSON.parse).map(function(state){return state['user']||'username';}));
 
         this.allRepos.sampledBy(this.repoAdded,first).map(function(repos){return {'repos':repos};}).map(JSON.stringify).onValue(function(reposJSON) {
            var write = Bacon.fromNodeCallback(fs.writeFile, 'state.json', reposJSON);
