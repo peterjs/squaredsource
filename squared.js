@@ -29,6 +29,9 @@ window.onload = function(e) {
             return !x.call(arg);
         }
     };
+    var getUserHome = function() {
+        return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+    };
 
     function textFieldValue(textField) {
         var textFieldEvenetStream = Bacon.fromEventTarget(textField, 'keyup');
@@ -57,7 +60,7 @@ window.onload = function(e) {
         this.userProp.log('user property: ');
 
         //persistence
-        var read = Bacon.fromNodeCallback(fs.readFile, 'state.json');
+        var read = Bacon.fromNodeCallback(fs.readFile, getUserHome() + '/.squaredsource/state.json');
         read.onError(function(error) {console.log("Error loading saved repositories: " + error);});
         //on error, no values are passed here
         //TODO add checking valid git repo to repoAdded
@@ -76,16 +79,22 @@ window.onload = function(e) {
         this.repoAdded.plug(read.map(useDefVal("{\"repos\":[]}")).map(JSON.parse).flatMap(function(reposArray){return Bacon.fromArray((reposArray['repos']).filter(isString));}));
         this.user.plug(read.map(useDefVal("{\"user\":\"username\"}")).map(JSON.parse).map(function(state){return state['user'];}));
 
-        this.allRepos.sampledBy(modifications,first).map(function(repos){return {'repos':repos};}).map(JSON.stringify).onValue(function(reposJSON) {
-           var write = Bacon.fromNodeCallback(fs.writeFile, 'state.json', reposJSON);
-            write.onError(function(err) {console.log('saving failed ' + err);});
-        });
         var persist = Bacon.combineTemplate({
-            repos: this.allRepos.sampledBy(this.repoAdded,first),
+            repos: this.allRepos.sampledBy(modifications,first),
             user: this.userProp
         }).map(JSON.stringify).onValue(function(reposJSON) {
-                var write = Bacon.fromNodeCallback(fs.writeFile, 'state.json', reposJSON);
-                write.onError(function(err) {console.log('saving failed ' + err);});
+                var dir = getUserHome() + '/.squaredsource/';
+                var checkDir = Bacon.fromCallback(fs.exists, dir);
+                checkDir.flatMap(function(dirContent) {
+                    if (!!dirContent) {
+                        return Bacon.once(true);
+                    } else {
+                        return Bacon.fromNodeCallback(fs.mkdir, dir);
+                    }
+                }).onValue(function(a) {
+                        var write = Bacon.fromNodeCallback(fs.writeFile, dir + 'state.json', reposJSON);
+                        write.onError(function(err) {console.log('saving failed ' + err);});
+                    });
             });
     }
 
