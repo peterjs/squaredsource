@@ -87,7 +87,7 @@ window.onload = function(e) {
             });
     }
 
-    function RepositoryView(path, model) {
+    function RepositoryCalendarView(path, model) {
         var colormap = function() {
             //colorbrewer2.org
             var colors = [[241,238,246], [189,201,225], [116,169,207], [42,140,190], [4,90,141]];
@@ -202,8 +202,8 @@ window.onload = function(e) {
             repoElem.textContent = repo;
             repoListElem.appendChild(repoElem);
 
-            var repoView = new RepositoryView(repo, model);
-            repoListElem.appendChild(repoView.element);
+            var repoCalendarView = new RepositoryCalendarView(repo, model);
+            repoListElem.appendChild(repoCalendarView.element);
         }
 
         //        model.repoAdded.onValue(function(repo){
