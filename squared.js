@@ -206,20 +206,7 @@ window.onload = function(e) {
             repoListElem.appendChild(repoCalendarView.element);
         }
 
-        //        model.repoAdded.onValue(function(repo){
-        //                addRepo(repo);
-        //            }
-        //        );
-
-        //        addedReposProp.combine(model.user, function(p, u) {
-//        model.repoAdded.combine(model.user, function(p, u) {
-//            return {path: p, user:u};
-//        }).onValue(function(pu) {
-//                addRepo(pu);
-//            });
-        model.repoAdded.onValue(function(repo){
-            addRepo(repo);
-        });
+        model.repoAdded.onValue(addRepo);
 
         //        var repaint = model.repoDeleted;
         //        repaint.onValue(render);
