@@ -41,9 +41,11 @@ window.onload = function(e) {
         //public in
         this.repoAdded = new Bacon.Bus();
         this.user = new Bacon.Bus();
+        this.repoRemoved = new Bacon.Bus();
 
         function addRepo (newRepo) {return function (repos) {return repos.concat([newRepo]);};}
-        var modifications = this.repoAdded.map(addRepo);
+        function removeRepo (repoToRemove) {return function (repos) {return repos.filter(function(r) {return r !== repoToRemove;});}}
+        var modifications = this.repoAdded.map(addRepo).merge(this.repoRemoved.map(removeRepo));
         //public out
         this.allRepos = modifications.scan([], function (repos, modification) {return modification(repos);});
         this.userProp = this.user.toProperty();
@@ -74,7 +76,7 @@ window.onload = function(e) {
         this.repoAdded.plug(read.map(useDefVal("{\"repos\":[]}")).map(JSON.parse).flatMap(function(reposArray){return Bacon.fromArray((reposArray['repos']).filter(isString));}));
         this.user.plug(read.map(useDefVal("{\"user\":\"username\"}")).map(JSON.parse).map(function(state){return state['user'];}));
 
-        this.allRepos.sampledBy(this.repoAdded,first).map(function(repos){return {'repos':repos};}).map(JSON.stringify).onValue(function(reposJSON) {
+        this.allRepos.sampledBy(modifications,first).map(function(repos){return {'repos':repos};}).map(JSON.stringify).onValue(function(reposJSON) {
            var write = Bacon.fromNodeCallback(fs.writeFile, 'state.json', reposJSON);
             write.onError(function(err) {console.log('saving failed ' + err);});
         });
@@ -192,6 +194,23 @@ window.onload = function(e) {
         cal.onValue(function(val){});
     }
 
+    function RepositoryHeaderView(path, model) {
+        var element = document.createElement('div');
+        var button = document.createElement('input');
+        button.setAttribute('type','button');
+        button.setAttribute('value','remove');
+        button.setAttribute('id', path);
+        element.appendChild(button);
+
+        var removeEventStream = Bacon.fromEventTarget(button, 'click').map('.target').map('.id');
+        removeEventStream.log('remove ');
+
+        model.repoRemoved.plug(removeEventStream);
+
+
+        this.element = element;
+    }
+
     function RepositoryListView(repoListElem, model) {
         function addRepo(repo) {
             console.log('adding repo ' + repo);
@@ -201,7 +220,7 @@ window.onload = function(e) {
             var repoHeader = new RepositoryHeaderView(repo, model);
             var repoCalendarView = new RepositoryCalendarView(repo, model);
 
-            listElem.setAttribute('value',repo);
+            listElem.setAttribute('id',repo);
             repoElem.textContent = repo;
 
             repoListElem.appendChild(listElem);
@@ -210,7 +229,12 @@ window.onload = function(e) {
             listElem.appendChild(repoCalendarView.element);
         }
 
+        function removeRepo(repo) {
+            _.each(_.filter(repoListElem.children, function(elem) {return elem.id === repo;}), function(elem) {elem.remove();});
+        }
+
         model.repoAdded.onValue(addRepo);
+        model.repoRemoved.onValue(removeRepo);
 
         //        var repaint = model.repoDeleted;
         //        repaint.onValue(render);
