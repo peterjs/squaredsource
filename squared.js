@@ -272,9 +272,9 @@ window.onload = function(e) {
         isValidFoldersRepos.onValue(function (valid) {
             var repoElement = document.getElementById('repos');
             if (valid) {
-                repoElement.setAttribute('style', 'background-color: #f1eef6;');
+                repoElement.setAttribute('style', 'background-color: #f1eef6; border: 1px solid #bdc9e1; color: #434343;');
             } else {
-                repoElement.setAttribute('style', 'background-color: #f8ccd6;');
+                repoElement.setAttribute('style', 'background-color: #f8ccd6; border: 1px solid #bdc9e1; color: #434343;');
             }
         });
 
