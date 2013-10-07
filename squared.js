@@ -197,13 +197,17 @@ window.onload = function(e) {
             console.log('adding repo ' + repo);
 
             var listElem = document.createElement('ul');
-            repoListElem.appendChild(listElem);
             var repoElem = document.createElement('li');
-            repoElem.textContent = repo;
-            repoListElem.appendChild(repoElem);
-
+            var repoHeader = new RepositoryHeaderView(repo, model);
             var repoCalendarView = new RepositoryCalendarView(repo, model);
-            repoListElem.appendChild(repoCalendarView.element);
+
+            listElem.setAttribute('value',repo);
+            repoElem.textContent = repo;
+
+            repoListElem.appendChild(listElem);
+            listElem.appendChild(repoElem);
+            listElem.appendChild(repoHeader.element);
+            listElem.appendChild(repoCalendarView.element);
         }
 
         model.repoAdded.onValue(addRepo);
