@@ -1,5 +1,5 @@
 {
-    "name": "Squaredsource",
+    "name": "squaredsource",
     "main": "index.html",
     "version": "0.1.0",
     "homepage": "https://github.com/peter/grunt-test",
@@ -21,7 +21,7 @@
         }
     ],
     "window": {
-        "title": "Squaredsource",
+        "title": "squaredsource",
         "toolbar": false,
         "position": "center",
         "width": 847,
