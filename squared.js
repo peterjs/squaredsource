@@ -7,8 +7,13 @@ window.onload = function(e) {
     //git version 1.7.5.4
     //require at least git 1.8.3.1
 
-    var which = require('which');
-    //    var gitExeFilename = which.sync('git');
+    var which = require('./lib/which.js');
+    var gitExeFilename55 = which.sync('git');
+    var exec = require('child_process').exec;
+    console.log('giiiiiiiiiiiiiit ' + gitExeFilename55);
+    var versions = Bacon.fromArray(gitExeFilename55).flatMap(function (ex) {return Bacon.fromNodeCallback(exec, ex + ' --version')});
+    versions.log('version ');
+    //pick the first git with sufficiently high version
     var gitExeFilename = '/opt/local/bin/git';
     console.log('found git: ' + gitExeFilename);
 
