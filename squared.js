@@ -11,8 +11,19 @@ window.onload = function(e) {
     var gitExeFilename55 = which.sync('git');
     var exec = require('child_process').exec;
     console.log('giiiiiiiiiiiiiit ' + gitExeFilename55);
-    var versions = Bacon.fromArray(gitExeFilename55).flatMap(function (ex) {return Bacon.fromNodeCallback(exec, ex + ' --version')});
-    versions.log('version ');
+
+    function checkVersion (git) {
+        var match = git.match(/^git version ([0-9]*).([0-9]*)/);
+        return match[1] == 1 && match[2] >= 8;
+    }
+
+    //creates an EventStream that delivers the given series of values to the first subscriber
+    var executables = Bacon.fromArray(gitExeFilename55);
+    var versions = executables.flatMap(function (ex) {return Bacon.fromNodeCallback(exec, ex + ' --version').filter(checkVersion).map(function(ver) {return {executable:ex, version:ver}});});
+//    versions.log('versions ');
+    //.filter(function(git){return git.hasOwnProperty('version');}).
+
+    versions.onValue(function(val) {console.log ('AAAAAAAAAA ' + val['executable'] + ' veeer ' + val['version'] );});
     //pick the first git with sufficiently high version
     var gitExeFilename = '/opt/local/bin/git';
     console.log('found git: ' + gitExeFilename);
