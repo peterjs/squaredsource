@@ -8,28 +8,67 @@ window.onload = function(e) {
     //require at least git 1.8.3.1
 
     var which = require('./lib/which.js');
-    var gitExeFilename55 = which.sync('git');
-    var exec = require('child_process').exec;
-    console.log('giiiiiiiiiiiiiit ' + gitExeFilename55);
+//    var gitExeFilename55 = which.sync('git');
+//    var exec = require('child_process').exec;
+//    console.log('giiiiiiiiiiiiiit ' + gitExeFilename55);
+//
+//    function checkVersion (git) {
+//        var match = git.match(/^git version ([0-9]*).([0-9]*)/);
+//        return match[1] == 1 && match[2] >= 8;
+//    }
+//
+//    //creates an EventStream that delivers the given series of values to the first subscriber
+//    var executables = Bacon.fromArray(gitExeFilename55);
+//    var versions = executables.flatMap(function (ex) {return Bacon.fromNodeCallback(exec, ex + ' --version').filter(checkVersion).map(function(ver) {return {executable:ex, version:ver}});});
+////    versions.log('versions ');
+//    //.filter(function(git){return git.hasOwnProperty('version');}).
+//
+//    versions.onValue(function(val) {console.log ('AAAAAAAAAA ' + val['executable'] + ' veeer ' + val['version'] );});
+//    pick the first git with sufficiently high version
+//    var gitExeFilename = '/opt/local/bin/git';
+//    console.log('found git: ' + gitExeFilename);
+//var which = require('which');
 
-    function checkVersion (git) {
-        var match = git.match(/^git version ([0-9]*).([0-9]*)/);
-        return match[1] == 1 && match[2] >= 8;
+    //var gitExeFilename = '/opt/local/bin/git';
+    var gitExeFilename = '';
+    var exec = require('child_process').exec;
+//    console.log('giiiiiiiiiiiiiit ' + gitExeFilename55);
+
+    function parseGitVersion(gitReturnVal) {
+//        var match = git.match(/^git version ([0-9]*).([0-9]*)/);
+//        return match[1] == 1 && match[2] >= 8;
+        var match = gitReturnVal.match(/^git version ([0-9]*).([0-9]*).([0-9]*).([0-9]*)/);
+        //remove the 0th element, which is the original string - i.e. rest
+        return match?match.slice(1,match.length):false;
     }
 
-    //creates an EventStream that delivers the given series of values to the first subscriber
-    var executables = Bacon.fromArray(gitExeFilename55);
-    var versions = executables.flatMap(function (ex) {return Bacon.fromNodeCallback(exec, ex + ' --version').filter(checkVersion).map(function(ver) {return {executable:ex, version:ver}});});
-//    versions.log('versions ');
-    //.filter(function(git){return git.hasOwnProperty('version');}).
+    function checkGitVersion(gitVersion) {
+        return gitVersion[0] == 1 && gitVersion[1] >= 8;
+    }
 
-    versions.onValue(function(val) {console.log ('AAAAAAAAAA ' + val['executable'] + ' veeer ' + val['version'] );});
-    //pick the first git with sufficiently high version
-    var gitExeFilename = '/opt/local/bin/git';
-    console.log('found git: ' + gitExeFilename);
+    var gitExeFilenameArray = which.sync('git');
 
+    var callbacksCount = 0;
+
+    gitExeFilenameArray.forEach(function(execPath) {
+        exec(execPath + ' --version', function(error, val) {
+            callbacksCount = callbacksCount + 1;
+            console.log('callbacksCount ' + callbacksCount);
+            if (checkGitVersion(parseGitVersion(val))) {
+                gitExeFilename = gitExeFilename || execPath;
+            }
+            if (gitExeFilename) {
+                console.log('gitExeFilename ' + gitExeFilename + ' count ' + callbacksCount);
+                foo(gitExeFilename);
+            }
+        });
+    });
+
+
+function foo(gitExecPath){
     var fs = require('fs');
     var gw = require('./lib/gitWrapper');
+    gw.setGit(gitExecPath);
 
     var t = function(x) {return x;};
     var toBool = function(x) {if (x) {return true;} else {return false;}};
@@ -338,4 +377,5 @@ window.onload = function(e) {
     }
 
     new SquaredApp();
+}
 };
