@@ -49,6 +49,7 @@ window.onload = function(e) {
     var gitExeFilenameArray = which.sync('git');
 
     var callbacksCount = 0;
+    var inited = false;
 
     gitExeFilenameArray.forEach(function(execPath) {
         exec(execPath + ' --version', function(error, val) {
@@ -57,9 +58,10 @@ window.onload = function(e) {
             if (checkGitVersion(parseGitVersion(val))) {
                 gitExeFilename = gitExeFilename || execPath;
             }
-            if (gitExeFilename) {
+            if (gitExeFilename && !inited) {
                 console.log('gitExeFilename ' + gitExeFilename + ' count ' + callbacksCount);
                 foo(gitExeFilename);
+                inited = true;
             }
         });
     });
