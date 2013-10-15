@@ -175,7 +175,7 @@ function foo(gitExecPath){
                 min = 0;
             }
             var colorMapMax = colormap.length-1;
-            return colormap[Math.round(val/(max-min)*colorMapMax)];
+            return colormap[Math.ceil(val/(max-min)*colorMapMax)];
         };
 
         var element = document.createElement('div');
