@@ -310,6 +310,13 @@ function foo(gitExecPath){
         //        repaint.onValue(render);
     }
 
+    function OmniboxView(folder) {
+        folder.onValue(function(f){
+            //from end to last / or \
+           console.log('repo stem ' + f.match(/.*[\\/]/));
+        });
+    }
+
     function AddNewRepositoryView(model) {
 
         var repoTextField = document.getElementById('repos');
@@ -351,6 +358,9 @@ function foo(gitExecPath){
             //push returns the length of the array, concat returns the new array
             return oldRepos.indexOf(newRepo)>=0?oldRepos:oldRepos.concat([newRepo]);
         });
+
+
+        var omnibox = new OmniboxView(repo);
 
         model.repoAdded.plug(repoListStream);
     }
