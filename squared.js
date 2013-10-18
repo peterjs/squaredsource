@@ -311,10 +311,18 @@ function foo(gitExecPath){
     }
 
     function OmniboxView(folder) {
-        folder.onValue(function(f){
+        folder.flatMap(function(f){
+            //stem repo
             //from end to last / or \
-           console.log('repo stem ' + f.match(/.*[\\/]/));
-        });
+            var path = f.match(/.*[\\/]/);
+            path = path?path.toString():'';
+            console.log('folder path ' + path);
+           return Bacon.fromNodeCallback(fs.readdir, path);
+        }).onValue(function(ste){
+                console.log('stemmed ' + ste);
+            });
+        //fill the best match with gray letters - fill on enter
+        //up-down arrows move in popup - enter fill in
     }
 
     function AddNewRepositoryView(model) {
