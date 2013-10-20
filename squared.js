@@ -310,16 +310,23 @@ function foo(gitExecPath){
         //        repaint.onValue(render);
     }
 
-    function OmniboxView(folder) {
-        folder.flatMap(function(f){
+    function OmniboxView(model) {
+        model.possiblePaths.onValue(function(paths){
+            console.log('possible paths ' + paths);
+        });
+    }
+
+    function OmniboxModel(folder) {
+        this.possiblePaths = folder.flatMap(function(f){
             //stem repo
             //from end to last / or \
             var path = f.match(/.*[\\/]/);
             path = path?path.toString():'';
             console.log('folder path ' + path);
            return Bacon.fromNodeCallback(fs.readdir, path);
-        }).onValue(function(ste){
-                console.log('stemmed ' + ste);
+        }).map(function(ste){
+                ste = ste.filter(function(dir) {return dir[0] !== '.';});
+                return ste;
             });
         //fill the best match with gray letters - fill on enter
         //up-down arrows move in popup - enter fill in
@@ -368,7 +375,8 @@ function foo(gitExecPath){
         });
 
 
-        var omnibox = new OmniboxView(repo);
+        var omniboxModel = new OmniboxModel(repo);
+        var omniboxView = new OmniboxView(omniboxModel);
 
         model.repoAdded.plug(repoListStream);
     }
