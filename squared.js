@@ -323,10 +323,10 @@ function foo(gitExecPath){
             var path = f.match(/.*[\\/]/);
             path = path?path.toString():'';
             console.log('folder path ' + path);
-           return Bacon.fromNodeCallback(fs.readdir, path);
-        }).map(function(ste){
-                ste = ste.filter(function(dir) {return dir[0] !== '.';});
-                return ste;
+           return Bacon.combineTemplate({current_dir: path, subdirs: Bacon.fromNodeCallback(fs.readdir, path)});
+        }).map(function(paths){
+                var valid_subdirs = paths['subdirs'].filter(function(dir) {return dir[0] !== '.';});
+                return valid_subdirs.map(function(subdir){return paths['current_dir'] + subdir;});
             });
         //fill the best match with gray letters - fill on enter
         //up-down arrows move in popup - enter fill in
