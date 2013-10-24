@@ -317,8 +317,11 @@ function foo(gitExecPath){
         //repo add / - on different platforms as last character
 
         var isValidFoldersReposFsExists = repo.flatMapLatest(function(path){
-            return Bacon.fromCallback(fs.exists, path);
-        });
+            return Bacon.fromNodeCallback(fs.stat, path);
+        }).map(function(stat) {
+                //is not called on error
+                return stat.isDirectory();
+            });
 
         var isValidFoldersReposGetStatus = repo.sampledBy(isValidFoldersReposFsExists.filter(t)).flatMapLatest(function(path){
             return Bacon.fromNodeCallback(gw.getStatus, path);
