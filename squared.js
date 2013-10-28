@@ -320,10 +320,12 @@ function foo(gitExecPath){
         this.possiblePaths = folder.flatMap(function(f){
             //stem repo
             //from end to last / or \
-            var path = f.match(/.*[\\/]/);
+            var matches = f.match(/(.*[\\/])(.*)/);
+            var path = matches?matches[1]:'';
             path = path?path.toString():'';
-            console.log('folder path ' + path);
-           return Bacon.combineTemplate({current_dir: path, subdirs: Bacon.fromNodeCallback(fs.readdir, path)});
+            var beginsWith = matches?matches[2]:'';
+            console.log('begins with ' + beginsWith);
+           return Bacon.combineTemplate({current_dir: path, subdirs: Bacon.fromNodeCallback(fs.readdir, path), begins_with:beginsWith});
         }).map(function(paths){
                 var valid_subdirs = paths['subdirs'].filter(function(dir) {return dir[0] !== '.';});
                 return valid_subdirs.map(function(subdir){return paths['current_dir'] + subdir;});
