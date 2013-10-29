@@ -310,28 +310,27 @@ function foo(gitExecPath){
         //        repaint.onValue(render);
     }
 
-    function OmniboxView(model) {
-        model.possiblePaths.onValue(function(paths){
-            console.log('possible paths ' + paths);
-        });
-    }
-
-    function OmniboxModel(folder) {
-        this.possiblePaths = folder.flatMap(function(f){
+    function OmniboxView(folder) {
+        var possiblePaths = folder.flatMap(function(f){
             //stem repo
             //from end to last / or \
             var matches = f.match(/(.*[\\/])(.*)/);
             var path = matches?matches[1]:'';
             path = path?path.toString():'';
-            var beginsWith = matches?matches[2]:'';
-            console.log('begins with ' + beginsWith);
-           return Bacon.combineTemplate({current_dir: path, subdirs: Bacon.fromNodeCallback(fs.readdir, path), begins_with:beginsWith});
+            var subDirBeginsWith = matches?matches[2]:'';
+            console.log('begins with ' + subDirBeginsWith);
+           return Bacon.combineTemplate({current_dir: path, subdirs: Bacon.fromNodeCallback(fs.readdir, path), subdir_begins_with:subDirBeginsWith});
         }).map(function(paths){
                 var valid_subdirs = paths['subdirs'].filter(function(dir) {return dir[0] !== '.';});
-                return valid_subdirs.map(function(subdir){return paths['current_dir'] + subdir;});
+                var subdirs = valid_subdirs.filter(function(subdir){return subdir.indexOf(paths.subdir_begins_with) === 0;});
+                return subdirs.map(function(subdir){return paths['current_dir'] + subdir;});
             });
         //fill the best match with gray letters - fill on enter
         //up-down arrows move in popup - enter fill in
+
+        possiblePaths.onValue(function(paths){
+            console.log('possible paths ' + paths);
+        });
     }
 
     function AddNewRepositoryView(model) {
@@ -376,9 +375,7 @@ function foo(gitExecPath){
             return oldRepos.indexOf(newRepo)>=0?oldRepos:oldRepos.concat([newRepo]);
         });
 
-
-        var omniboxModel = new OmniboxModel(repo);
-        var omniboxView = new OmniboxView(omniboxModel);
+        var omniboxView = new OmniboxView(repo);
 
         model.repoAdded.plug(repoListStream);
     }
